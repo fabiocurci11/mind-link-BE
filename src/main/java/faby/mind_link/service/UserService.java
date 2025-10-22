@@ -1,5 +1,5 @@
 package faby.mind_link.service;
-import faby.mind_link.dto.UserRegistrationDTO;
+import faby.mind_link.dto.UserSignupDTO;
 import faby.mind_link.entity.User;
 import faby.mind_link.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,7 +17,7 @@ public class UserService {
     }
 
     // Registrazione utente con password criptata
-    public User signupUser(UserRegistrationDTO dto) {
+    public User signupUser(UserSignupDTO dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new RuntimeException("Email già registrata");
         }
