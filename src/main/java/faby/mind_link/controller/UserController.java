@@ -1,8 +1,10 @@
 package faby.mind_link.controller;
 
+import faby.mind_link.dto.JwtResponseDTO;
 import faby.mind_link.dto.UserLoginDTO;
 import faby.mind_link.dto.UserSignupDTO;
 import faby.mind_link.entity.User;
+import faby.mind_link.security.JwtUtil;
 import faby.mind_link.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +29,9 @@ public class UserController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping("/signup")
     public ResponseEntity<User> createUser(@RequestBody UserSignupDTO dto) {
         try {
@@ -38,16 +44,25 @@ public class UserController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserLoginDTO dto) {
+    public ResponseEntity<?> login(@RequestBody UserLoginDTO dto) {
         try {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
             );
-            // Se arriva qui, login riuscito
-            System.out.println("Login OK");
-            return ResponseEntity.ok("Login avvenuto con successo");
+
+            UserDetails userDetails = (UserDetails) auth.getPrincipal();
+            String token = jwtUtil.generateToken(userDetails.getUsername());
+
+            JwtResponseDTO response = new JwtResponseDTO(
+                    token,
+                    "Login avvenuto con successo",
+                    userDetails.getUsername()
+            );
+            return ResponseEntity.ok(response);
         } catch (AuthenticationException e) {
             return ResponseEntity.status(401).body("Credenziali errate");
         }
     }
+
+
 }

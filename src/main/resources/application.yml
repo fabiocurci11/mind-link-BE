@@ -4,4 +4,7 @@ spring:
     profiles:
         active: local
 
+jwt:
+    secret: "mY7vL9j8q2KxP4sE1uR0nD6hT3cB5fG8yH1kM2wQ9pV7zX0aL4" # almeno 48 caratteri
+    expiration: 3600000 # durata token in ms (1 ora)
 
