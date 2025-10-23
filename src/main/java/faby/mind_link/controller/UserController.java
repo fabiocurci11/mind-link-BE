@@ -2,6 +2,7 @@ package faby.mind_link.controller;
 
 import faby.mind_link.dto.JwtResponseDTO;
 import faby.mind_link.dto.UserLoginDTO;
+import faby.mind_link.dto.UserResponseDTO;
 import faby.mind_link.dto.UserSignupDTO;
 import faby.mind_link.entity.User;
 import faby.mind_link.security.JwtUtil;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -33,12 +36,24 @@ public class UserController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/signup")
-    public ResponseEntity<User> createUser(@RequestBody UserSignupDTO dto) {
+    public ResponseEntity<?> signup(@RequestBody UserSignupDTO dto) {
         try {
             User createdUser = userService.signupUser(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+
+            // Mappa User -> UserResponseDTO
+            UserResponseDTO response = new UserResponseDTO(
+                    createdUser.getEmail(),
+                    createdUser.getFirstName(),
+                    createdUser.getLastName()
+            );
+            System.out.println("User "+ response.getEmail() + " registrato con successo");
+            System.out.println(response.toString());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
